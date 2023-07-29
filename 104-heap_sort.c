@@ -1,65 +1,57 @@
+#include <stdint.h>
 #include "sort.h"
-
+#define getParent(i) (((i) - 1) / 2)
+#define getLeft(i) (2 * (i) + 1)
+#define getRight(i) (2 * (i) + 2)
 /**
- * swap_root - A function that swap the root nodes.
- * @array: The heap to sort.
- * @root: The root of the heap.
- * @hi: The higher index.
- * @size: The size of the array.
- * Return: Nothing
+ * sift_down - sift_down
+ * @array: array containing heap
+ * @size: total size of array
+ * @index: index of index node of heap
+ * @nth: index of nth node in heap to examine
  */
-void swap_root(int *array, size_t root, size_t hi, size_t size)
+void sift_down(int *array, size_t size, size_t index, size_t nth)
 {
-	size_t lo = 0, mi = 0, tmp = 0;
-	int aux = 0;
-
-	while ((lo = (2 * root + 1)) <= hi)
-	{
-		tmp = root;
-		mi = lo + 1;
-		if (array[tmp] < array[lo])
-			tmp = lo;
-		if (mi <= hi && array[tmp] < array[mi])
-			tmp = mi;
-		if (tmp == root)
-			return;
-		aux = array[root];
-		array[root] = array[tmp];
-		array[tmp] = aux;
-		print_array(array, size);
-		root = tmp;
-	}
+size_t largest, left, right;
+do {
+left = getLeft(index);
+right = getRight(index);
+largest = index;
+if (right <= nth && array[right] > array[index])
+largest = right;
+if (array[left] > array[largest])
+largest = left;
+if (index == largest)
+return;
+array[index] ^= array[largest];
+array[largest] ^= array[index];
+array[index] ^= array[largest];
+print_array(array, size);
+index = largest;
+} while (getLeft(index) <= nth);
 }
-
 /**
- * heap_sort - A function that sorts an array using heap algorithm.
- * @array: An array to sort.
- * @size: The size of the array.
- * Return: Nothing.
+ * heap_sort - use heap sort
+ * @array: array to sort
+ * @size: size of array
  */
 void heap_sort(int *array, size_t size)
 {
-	size_t hi = 0, gap = 0;
-	int tmp = 0;
-
-		if (array == NULL || size < 2)
-			return;
-
-		for (gap = (size - 2) / 2; 1; gap--)
-		{
-			swap_root(array, gap, size - 1, size);
-			if (gap == 0)
-				break;
-		}
-
-		hi = size - 1;
-		while (hi > 0)
-	{
-		tmp = array[hi];
-		array[hi] = array[0];
-		array[0] = tmp;
-		print_array(array, size);
-		hi--;
-		swap_root(array, 0, hi, size);
-	}
+size_t node, sorted;
+if (array == NULL || size < 2)
+return;
+for (node = getParent(size - 1); node != SIZE_MAX; node--)
+sift_down(array, size, node, size - 1);
+for (sorted = size - 1; sorted > 1; sorted--)
+{
+array[0] ^= array[sorted];
+array[sorted] ^= array[0];
+array[0] ^= array[sorted];
+print_array(array, size);
+sift_down(array, size, 0, sorted - 1);
+}
+array[0] ^= array[1];
+array[1] ^= array[0];
+array[0] ^= array[1];
+print_array(array, size);
 }
